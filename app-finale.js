@@ -9,3 +9,9 @@ function editGift(x){$('#giftId').value=x.id;$('#title').value=x.title||'';$('#d
 $('#giftForm').onsubmit=async e=>{e.preventDefault();const data={title:$('#title').value.trim(),description:$('#description').value.trim(),price:$('#price').value===''?'':Number($('#price').value),url:$('#url').value.trim(),image:$('#image').value.trim()};try{const id=$('#giftId').value;if(id)await updateDoc(doc(db,'gifts',id),data);else await addDoc(collection(db,'gifts'),{...data,reserved:false,reservedBy:'',showName:false,createdAt:serverTimestamp()});$('#edit').close();toast('Regalo salvato')}catch{toast('Salvataggio non riuscito')}};
 function reserveGift(x){$('#reserveId').value=x.id;$('#reservedBy').value='';$('#showName').checked=false;$('#reserve').showModal()}
 $('#reserveForm').onsubmit=async e=>{e.preventDefault();try{await runTransaction(db,async t=>{const r=doc(db,'gifts',$('#reserveId').value),s=await t.get(r);if(!s.exists()||s.data().reserved)throw 0;t.update(r,{reserved:true,reservedBy:$('#reservedBy').value.trim(),showName:$('#showName').checked,reservedAt:serverTimestamp()})});$('#reserve').close();toast('Regalo segnato come preso!')}catch{toast('Regalo già scelto')}};
+
+// Comando neve: ricorda la scelta su questo dispositivo
+const snowToggle=document.querySelector('#snowToggle');
+function setSnow(off){document.body.classList.toggle('snow-off',off);snowToggle.textContent=off?'❄️ Neve: OFF':'❄️ Neve: ON';snowToggle.setAttribute('aria-pressed',String(off));localStorage.setItem('snowOff',off?'1':'0');}
+setSnow(localStorage.getItem('snowOff')==='1');
+snowToggle.addEventListener('click',()=>setSnow(!document.body.classList.contains('snow-off')));
